@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { type IntelligenceType, intelligenceMap, questions } from "@/data/questions";
+import { getMixCareer } from "@/data/mixCareers";
 import BubbleChart from "./BubbleChart";
 import RadialBarChart from "./RadialBarChart";
 import { toPng } from "html-to-image";
@@ -32,6 +33,7 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
     (a, b) => b[1] - a[1]
   );
   const topThree = sortedEntries.slice(0, 3);
+  const mixCareer = getMixCareer(topThree[0][0], topThree[1][0], topThree[2][0]);
 
   const handleSave = useCallback(async () => {
     if (!resultRef.current || isSaving) return;
@@ -287,6 +289,71 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
               );
             })}
           </div>
+
+          {/* Mix Career Analysis */}
+          {mixCareer && (
+            <div className="mt-8">
+              <h3 className="text-lg lg:text-xl font-bold mb-4" style={{ color: "#1E293B" }}>
+                나의 강점 믹스 분석
+              </h3>
+              <div
+                className="rounded-2xl overflow-hidden shadow-sm"
+                style={{
+                  background: "linear-gradient(135deg, #2563EB08, #7C3AED08)",
+                  border: "1px solid #E2E8F0",
+                }}
+              >
+                {/* Mix title */}
+                <div className="p-5 pb-3">
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {topThree.map(([key]) => {
+                      const info = intelligenceMap[key];
+                      return (
+                        <span
+                          key={key}
+                          className="px-2.5 py-1 rounded-full text-xs font-medium text-white"
+                          style={{ backgroundColor: info.color }}
+                        >
+                          {info.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <h4 className="text-lg lg:text-xl font-bold mb-1" style={{ color: "#1E293B" }}>
+                    {mixCareer.title}
+                  </h4>
+                  <p className="text-sm leading-relaxed" style={{ color: "#64748B" }}>
+                    {mixCareer.description}
+                  </p>
+                </div>
+
+                {/* Mix recommended careers */}
+                <div className="px-5 pb-5">
+                  <span
+                    className="inline-block text-xs font-bold mb-2 px-2 py-0.5 rounded"
+                    style={{ backgroundColor: "#2563EB12", color: "#2563EB" }}
+                  >
+                    이 조합에 딱 맞는 직업
+                  </span>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {mixCareer.careers.map((career) => (
+                      <span
+                        key={career}
+                        className="px-3 py-1.5 rounded-xl text-sm font-medium"
+                        style={{
+                          background: "white",
+                          color: "#1E293B",
+                          border: "1px solid #E2E8F0",
+                        }}
+                      >
+                        {career}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action buttons */}
