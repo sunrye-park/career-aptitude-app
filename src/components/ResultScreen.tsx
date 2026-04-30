@@ -5,7 +5,7 @@ import { type IntelligenceType, intelligenceMap, questions } from "@/data/questi
 import { getMixCareer } from "@/data/mixCareers";
 import BubbleChart from "./BubbleChart";
 import RadialBarChart from "./RadialBarChart";
-import { toPng } from "html-to-image";
+import html2canvas from "html2canvas";
 
 interface ResultScreenProps {
   answers: Record<number, number>;
@@ -39,14 +39,15 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
     if (!resultRef.current || isSaving) return;
     setIsSaving(true);
     try {
-      const dataUrl = await toPng(resultRef.current, {
+      const canvas = await html2canvas(resultRef.current, {
         backgroundColor: "#F8FAFC",
-        pixelRatio: 4,
-        quality: 1,
+        scale: 3,
+        useCORS: true,
+        logging: false,
       });
       const link = document.createElement("a");
       link.download = "다중지능_진단결과.png";
-      link.href = dataUrl;
+      link.href = canvas.toDataURL("image/png", 1.0);
       link.click();
     } catch {
       alert("이미지 저장에 실패했습니다. 스크린샷을 이용해주세요.");
