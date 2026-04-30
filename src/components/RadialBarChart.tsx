@@ -57,8 +57,9 @@ export default function RadialBarChart({ scores }: RadialBarChartProps) {
                 strokeDasharray={`${arcLength} ${circumference}`}
                 strokeLinecap="round"
                 transform={`rotate(${rotation} ${center} ${center})`}
+                className="radial-bar-item"
                 style={{
-                  animation: `radialFill 1s ease-out ${index * 0.1}s both`,
+                  animationDelay: `${index * 0.1}s`,
                 }}
               />
               {/* Label at end of bar */}
@@ -101,13 +102,6 @@ export default function RadialBarChart({ scores }: RadialBarChartProps) {
           {intelligenceMap[entries[0][0]].label}
         </text>
 
-        <style>{`
-          @keyframes radialFill {
-            from {
-              stroke-dasharray: 0 9999;
-            }
-          }
-        `}</style>
       </svg>
     </div>
   );

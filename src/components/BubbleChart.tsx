@@ -97,8 +97,9 @@ export default function BubbleChart({ scores }: BubbleChartProps) {
           return (
             <g
               key={bubble.key}
+              className="bubble-item"
               style={{
-                animation: `bubbleIn 0.6s ease-out ${index * 0.08}s both`,
+                animationDelay: `${index * 0.08}s`,
               }}
             >
               {/* Glow */}
@@ -146,18 +147,6 @@ export default function BubbleChart({ scores }: BubbleChartProps) {
           );
         })}
 
-        <style>{`
-          @keyframes bubbleIn {
-            from {
-              transform: scale(0);
-              opacity: 0;
-            }
-            to {
-              transform: scale(1);
-              opacity: 1;
-            }
-          }
-        `}</style>
       </svg>
     </div>
   );
