@@ -41,7 +41,8 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
     try {
       const dataUrl = await toPng(resultRef.current, {
         backgroundColor: "#F8FAFC",
-        pixelRatio: 2,
+        pixelRatio: 4,
+        quality: 1,
       });
       const link = document.createElement("a");
       link.download = "다중지능_진단결과.png";
