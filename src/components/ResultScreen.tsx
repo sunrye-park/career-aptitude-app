@@ -327,6 +327,21 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
                   </p>
                 </div>
 
+                {/* Shining moment */}
+                {mixCareer.shiningMoment && (
+                  <div className="px-5 pb-3">
+                    <span
+                      className="inline-block text-xs font-bold mb-1.5 px-2 py-0.5 rounded"
+                      style={{ backgroundColor: "#7C3AED12", color: "#7C3AED" }}
+                    >
+                      이 조합이 빛나는 순간
+                    </span>
+                    <p className="text-sm leading-relaxed" style={{ color: "#64748B" }}>
+                      {mixCareer.shiningMoment}
+                    </p>
+                  </div>
+                )}
+
                 {/* Mix recommended careers */}
                 <div className="px-5 pb-5">
                   <span
@@ -335,19 +350,24 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
                   >
                     이 조합에 딱 맞는 직업
                   </span>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <div className="space-y-2 mt-1">
                     {mixCareer.careers.map((career) => (
-                      <span
-                        key={career}
-                        className="px-3 py-1.5 rounded-xl text-sm font-medium"
-                        style={{
-                          background: "white",
-                          color: "#1E293B",
-                          border: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {career}
-                      </span>
+                      <div key={career.name} className="flex gap-2">
+                        <span
+                          className="shrink-0 w-1.5 h-1.5 rounded-full mt-1.5"
+                          style={{ backgroundColor: "#2563EB" }}
+                        />
+                        <div>
+                          <span className="text-sm font-medium" style={{ color: "#1E293B" }}>
+                            {career.name}
+                          </span>
+                          {career.reason && (
+                            <p className="text-xs mt-0.5" style={{ color: "#94A3B8" }}>
+                              {career.reason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
