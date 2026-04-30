@@ -39,16 +39,53 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
     if (!resultRef.current || isSaving) return;
     setIsSaving(true);
     try {
+      // 폰트 로딩 완료 대기
+      await document.fonts.ready;
+
+      const dpr = window.devicePixelRatio || 1;
       const canvas = await html2canvas(resultRef.current, {
         backgroundColor: "#F8FAFC",
-        scale: 3,
+        scale: Math.max(dpr * 2, 4),
         useCORS: true,
+        allowTaint: true,
         logging: false,
+        imageTimeout: 0,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.querySelector("[data-result]") as HTMLElement;
+          if (el) {
+            el.style.setProperty("-webkit-font-smoothing", "antialiased");
+            el.style.setProperty("-moz-osx-font-smoothing", "grayscale");
+          }
+          // SVG를 인라인 이미지로 변환 (html2canvas SVG 렌더링 문제 해결)
+          const svgs = clonedDoc.querySelectorAll("svg");
+          svgs.forEach((svg) => {
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(svgBlob);
+            const img = clonedDoc.createElement("img");
+            img.src = url;
+            img.style.width = svg.getBoundingClientRect().width + "px";
+            img.style.height = svg.getBoundingClientRect().height + "px";
+            svg.parentNode?.replaceChild(img, svg);
+          });
+          // 이미지 로딩 대기
+          return new Promise<void>((resolve) => setTimeout(resolve, 300));
+        },
       });
-      const link = document.createElement("a");
-      link.download = "다중지능_진단결과.png";
-      link.href = canvas.toDataURL("image/png", 1.0);
-      link.click();
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.download = "다중지능_진단결과.png";
+          link.href = url;
+          link.click();
+          URL.revokeObjectURL(url);
+        },
+        "image/png",
+        1.0
+      );
     } catch {
       alert("이미지 저장에 실패했습니다. 스크린샷을 이용해주세요.");
     } finally {
@@ -60,7 +97,7 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
     <div className="min-h-dvh py-8 px-4" style={{ background: "#F8FAFC" }}>
       <div className="max-w-lg mx-auto">
         {/* Saveable area */}
-        <div ref={resultRef} className="pb-6" style={{ background: "#F8FAFC" }}>
+        <div ref={resultRef} data-result className="pb-6" style={{ background: "#F8FAFC" }}>
           {/* Header */}
           <div className="text-center mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: "#1E293B" }}>
