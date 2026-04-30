@@ -5,7 +5,7 @@ import { type IntelligenceType, intelligenceMap, questions } from "@/data/questi
 import { getMixCareer } from "@/data/mixCareers";
 import BubbleChart from "./BubbleChart";
 import RadialBarChart from "./RadialBarChart";
-import html2canvas from "html2canvas";
+import { toBlob } from "html-to-image";
 
 interface ResultScreenProps {
   answers: Record<number, number>;
@@ -39,53 +39,19 @@ export default function ResultScreen({ answers, onRestart }: ResultScreenProps) 
     if (!resultRef.current || isSaving) return;
     setIsSaving(true);
     try {
-      // 폰트 로딩 완료 대기
       await document.fonts.ready;
-
-      const dpr = window.devicePixelRatio || 1;
-      const canvas = await html2canvas(resultRef.current, {
+      const blob = await toBlob(resultRef.current, {
         backgroundColor: "#F8FAFC",
-        scale: Math.max(dpr * 2, 4),
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        imageTimeout: 0,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.querySelector("[data-result]") as HTMLElement;
-          if (el) {
-            el.style.setProperty("-webkit-font-smoothing", "antialiased");
-            el.style.setProperty("-moz-osx-font-smoothing", "grayscale");
-          }
-          // SVG를 인라인 이미지로 변환 (html2canvas SVG 렌더링 문제 해결)
-          const svgs = clonedDoc.querySelectorAll("svg");
-          svgs.forEach((svg) => {
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(svgBlob);
-            const img = clonedDoc.createElement("img");
-            img.src = url;
-            img.style.width = svg.getBoundingClientRect().width + "px";
-            img.style.height = svg.getBoundingClientRect().height + "px";
-            svg.parentNode?.replaceChild(img, svg);
-          });
-          // 이미지 로딩 대기
-          return new Promise<void>((resolve) => setTimeout(resolve, 300));
-        },
+        pixelRatio: 3,
+        cacheBust: true,
       });
-
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) return;
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.download = "다중지능_진단결과.png";
-          link.href = url;
-          link.click();
-          URL.revokeObjectURL(url);
-        },
-        "image/png",
-        1.0
-      );
+      if (!blob) throw new Error("blob is null");
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = "다중지능_진단결과.png";
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch {
       alert("이미지 저장에 실패했습니다. 스크린샷을 이용해주세요.");
     } finally {
